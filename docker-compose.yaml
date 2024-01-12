@@ -3,7 +3,7 @@ services:
   ollama-mistral:
     image: ollama/ollama:latest
     environment:
-      - OLLAMA_HOST=http://localhost:11434
+      - OLLAMA_PORT=11434
 
     # build:
     #   context: .
@@ -12,7 +12,7 @@ services:
     #     - modelName=mistral
     #     - OLLAMA_HOST=http://localhost:11434
     # entrypoint: /bin/bash
-    command: run mistral
+    # command: /scripts/ollama-startup.sh mistral
     ports:
       - "11434:11434"
     volumes:
@@ -29,7 +29,7 @@ services:
   ollama-phi:
     image: ollama/ollama:latest
     environment:
-      - OLLAMA_HOST=http://localhost:11435
+      - OLLAMA_PORT=11435
     # build:
     #   context: .
     #   dockerfile: Dockerfile.ollama
@@ -37,7 +37,7 @@ services:
     #     - modelName=phi
     #     - OLLAMA_HOST=http://localhost:11435
     # entrypoint: /bin/bash
-    command: run phi
+    # command: /scripts/ollama-startup.sh phi
     ports:
       - "11435:11435"
     volumes:
