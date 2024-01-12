@@ -1,0 +1,75 @@
+version: "3.9"
+services:
+  ollama-mistral:
+    image: ollama/ollama:latest
+    environment:
+      - OLLAMA_HOST=http://localhost:11434
+
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.ollama
+    #   args:
+    #     - modelName=mistral
+    #     - OLLAMA_HOST=http://localhost:11434
+    # entrypoint: /bin/bash
+    command: run mistral
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama:/root/.ollama
+      - ./scripts:/scripts
+
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           capabilities: [gpu]
+
+  ollama-phi:
+    image: ollama/ollama:latest
+    environment:
+      - OLLAMA_HOST=http://localhost:11435
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.ollama
+    #   args:
+    #     - modelName=phi
+    #     - OLLAMA_HOST=http://localhost:11435
+    # entrypoint: /bin/bash
+    command: run phi
+    ports:
+      - "11435:11435"
+    volumes:
+      - ./ollama:/root/.ollama
+      - ./scripts:/scripts
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           capabilities: [gpu]
+  litellm-mistral:
+    build:
+      context: .
+      dockerfile: Dockerfile.litellm
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ollama-mistral
+    environment:
+      - OLLAMA_HOST=http://ollama-mistral:11434
+    command: litellm --port 8000 --model ollama/mistral
+  litellm-phi:
+    build:
+      context: .
+      dockerfile: Dockerfile.litellm
+    ports:
+      - "8001:8001"
+    depends_on:
+      - ollama-phi
+    environment:
+      - OLLAMA_HOST=http://ollama-phi:11435
+    command: litellm --port 8001 --model ollama/phi
+volumes:
+  ollama:

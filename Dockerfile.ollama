@@ -1,0 +1,8 @@
+FROM ollama/ollama:latest
+
+ARG modelName
+ARG OLLAMA_HOST
+ENV OLLAMA_HOST=$OLLAMA_HOST
+COPY ./ollama-build.sh /ollama-build.sh
+RUN chmod +x /ollama-build.sh
+RUN /ollama-build.sh $modelName

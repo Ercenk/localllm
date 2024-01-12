@@ -1,0 +1,4 @@
+FROM python:3.11-slim-bullseye
+
+# Install the litellm[proxy] package
+RUN python3.11 -m pip install litellm[proxy]
