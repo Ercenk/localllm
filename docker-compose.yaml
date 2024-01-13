@@ -1,10 +1,10 @@
 version: "3.9"
 services:
   ollama-mistral:
-    # image: ollama/ollama:latest
-    build:
-      context: .
-      dockerfile: Dockerfile.ollama
+    image: ollama/ollama:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.ollama
     environment:
       - OLLAMA_HOST=0.0.0.0
     entrypoint: /bin/bash
@@ -14,19 +14,19 @@ services:
     volumes:
       - ./ollama/mistral:/root/.ollama
       - ./scripts:/scripts
-
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   ollama-phi:
-    # image: ollama/ollama:latest
-    build:
-      context: .
-      dockerfile: Dockerfile.ollama
+    image: ollama/ollama:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.ollama
     entrypoint: /bin/bash
     command: /scripts/ollama-startup.sh phi
     ports:
@@ -34,12 +34,13 @@ services:
     volumes:
       - ./ollama/phi:/root/.ollama
       - ./scripts:/scripts
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
   litellm-mistral:
     build:
       context: .
