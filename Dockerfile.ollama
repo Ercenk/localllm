@@ -1,8 +1,5 @@
-FROM ollama/ollama:latest
+FROM ubuntu:latest
 
-ARG modelName
-ARG OLLAMA_HOST
-ENV OLLAMA_HOST=$OLLAMA_HOST
-COPY ./ollama-build.sh /ollama-build.sh
-RUN chmod +x /ollama-build.sh
-RUN /ollama-build.sh $modelName
+RUN apt-get update && apt-get install -y curl
+
+RUN curl https://ollama.ai/install.sh | sh

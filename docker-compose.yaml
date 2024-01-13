@@ -1,22 +1,18 @@
 version: "3.9"
 services:
   ollama-mistral:
-    image: ollama/ollama:latest
+    # image: ollama/ollama:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
     environment:
-      - OLLAMA_PORT=11434
-
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.ollama
-    #   args:
-    #     - modelName=mistral
-    #     - OLLAMA_HOST=http://localhost:11434
-    # entrypoint: /bin/bash
-    # command: /scripts/ollama-startup.sh mistral
+      - OLLAMA_HOST=0.0.0.0
+    entrypoint: /bin/bash
+    command: /scripts/ollama-startup.sh mistral
     ports:
       - "11434:11434"
     volumes:
-      - ./ollama:/root/.ollama
+      - ./ollama/mistral:/root/.ollama
       - ./scripts:/scripts
 
     # deploy:
@@ -27,21 +23,16 @@ services:
     #           capabilities: [gpu]
 
   ollama-phi:
-    image: ollama/ollama:latest
-    environment:
-      - OLLAMA_PORT=11435
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.ollama
-    #   args:
-    #     - modelName=phi
-    #     - OLLAMA_HOST=http://localhost:11435
-    # entrypoint: /bin/bash
-    # command: /scripts/ollama-startup.sh phi
+    # image: ollama/ollama:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    entrypoint: /bin/bash
+    command: /scripts/ollama-startup.sh phi
     ports:
-      - "11435:11435"
+      - "11435:11434"
     volumes:
-      - ./ollama:/root/.ollama
+      - ./ollama/phi:/root/.ollama
       - ./scripts:/scripts
     # deploy:
     #   resources:
@@ -57,9 +48,7 @@ services:
       - "8000:8000"
     depends_on:
       - ollama-mistral
-    environment:
-      - OLLAMA_HOST=http://ollama-mistral:11434
-    command: litellm --port 8000 --model ollama/mistral
+    command: litellm --port 8000 --api_base http://ollama-mistral:11434 --model ollama/mistral
   litellm-phi:
     build:
       context: .
@@ -68,8 +57,6 @@ services:
       - "8001:8001"
     depends_on:
       - ollama-phi
-    environment:
-      - OLLAMA_HOST=http://ollama-phi:11435
-    command: litellm --port 8001 --model ollama/phi
+    command: litellm --port 8001  --api_base http://ollama-phi:11435 --model ollama/phi
 volumes:
   ollama:
