@@ -1,63 +1,25 @@
 version: "3.9"
 services:
-  ollama-mistral:
-    image: ollama/ollama:latest
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.ollama
-    environment:
-      - OLLAMA_HOST=0.0.0.0
-    entrypoint: /bin/bash
-    command: /scripts/ollama-startup.sh mistral
-    ports:
-      - "11434:11434"
-    volumes:
-      - ./ollama/mistral:/root/.ollama
-      - ./scripts:/scripts
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-
-  ollama-phi:
-    image: ollama/ollama:latest
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.ollama
-    entrypoint: /bin/bash
-    command: /scripts/ollama-startup.sh phi
-    ports:
-      - "11435:11434"
-    volumes:
-      - ./ollama/phi:/root/.ollama
-      - ./scripts:/scripts
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-  litellm-mistral:
+  localllm:
+    user: localllm
     build:
       context: .
-      dockerfile: Dockerfile.litellm
+      dockerfile: Dockerfile
+      args:
+        # entrypoint script arguments below should match this
+        # If you change the models, you need to run docker compose with --build to force build
+        MODELS: "mistral,llama2"
+    # Comment out the following line if you do not have GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     ports:
       - "8000:8000"
-    depends_on:
-      - ollama-mistral
-    command: litellm --port 8000 --api_base http://ollama-mistral:11434 --model ollama/mistral
-  litellm-phi:
-    build:
-      context: .
-      dockerfile: Dockerfile.litellm
-    ports:
       - "8001:8001"
-    depends_on:
-      - ollama-phi
-    command: litellm --port 8001  --api_base http://ollama-phi:11435 --model ollama/phi
-volumes:
-  ollama:
+    volumes:
+      - ./scripts:/home/localllm/scripts
+    entrypoint: /home/localllm/scripts/serve-models.sh "mistral,llama2"
